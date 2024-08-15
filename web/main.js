@@ -4,7 +4,7 @@ const { createWeb3Modal, defaultWagmiConfig } = Web3modal
 const { mainnet, sepolia } = Chains
 const { reconnect } = WagmiCore
 
-const projectId = 'cad4956f31a5e40a00b62865b030c6f8'
+const projectId = 'cad....'
 
 const metadata = {
   name: 'Web3Modal',

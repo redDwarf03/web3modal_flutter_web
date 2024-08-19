@@ -1,9 +1,14 @@
-// ignore_for_file: avoid_web_libraries_in_flutter
-
-import 'dart:js_util' as js_util;
-import 'dart:html' as html;
-
+import 'dart:js_interop';
 import 'package:flutter/material.dart';
+
+@JS()
+external JSWindow get window;
+
+@JS()
+extension type JSWindow(JSObject _) implements JSObject {
+  external void openModal();
+  external void closeModal();
+}
 
 void main() {
   runApp(const MyApp());
@@ -13,11 +18,11 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   void openModal() {
-    js_util.callMethod(html.window, 'openModal', []);
+    window.openModal();
   }
 
   void closeModal() {
-    js_util.callMethod(html.window, 'closeModal', []);
+    window.closeModal();
   }
 
   @override

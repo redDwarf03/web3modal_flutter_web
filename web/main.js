@@ -3,7 +3,7 @@ import { WagmiCore, Chains, Web3modal } from "https://cdn.jsdelivr.net/npm/cdn-w
 const { createWeb3Modal, defaultWagmiConfig } = Web3modal
 const { mainnet, sepolia } = Chains
 
-const { reconnect, getAccount, getChainId, getToken, signMessage, writeContract } = WagmiCore
+const { reconnect, getAccount, getChainId, getToken, signMessage, writeContract, getBalance, } = WagmiCore
 
 const projectId = '....'
 
@@ -47,60 +47,56 @@ window.getChainId = function () {
   return chainId;
 }
 
-window.getToken = async function (address, chainId) {
-  if (!address) {
+
+window.getBalance = async function (getBalanceParameters) {
+  if (!getBalanceParameters.address || !/^0x[a-fA-F0-9]{40}$/.test(getBalanceParameters.address)) {
+    console.error("Invalid address provided");
+    return null;
+  }
+
+  try {
+    return await getBalance(config, getBalanceParameters);
+  } catch (error) {
+    console.error("Error fetching balance:", error);
+    return null;
+  }
+}
+
+window.getToken = async function (getTokenParameters) {
+  if (!getTokenParameters.address) {
     console.error("No token address provided");
     return null;
   }
   try {
-    const token = await getToken(config, {
-      address: address,
-      chainId: chainId,
-    });
-    return token;
+    return await getToken(config, getTokenParameters);
   } catch (error) {
     console.error("Error fetching token info:", error);
     return null;
   }
 }
 
-window.signMessage = async function (message, accountAddress) {
-  if (!message) {
+window.signMessage = async function (signMessageParameters) {
+  if (!signMessageParameters.message) {
     console.error("No message provided");
     return null;
   }
-  if (!accountAddress || !/^0x[a-fA-F0-9]{40}$/.test(accountAddress)) {
+  if (!signMessageParameters.account || !/^0x[a-fA-F0-9]{40}$/.test(signMessageParameters.account)) {
     console.error("Invalid account address provided");
     return null;
   }
   try {
-    const signedMessage = await signMessage(config, {
-      account: accountAddress,
-      message: message,
-    });
-
-    return signedMessage;
+    return await signMessage(config, signMessageParameters);
   } catch (error) {
     console.error("Error message sign:", error);
     return null;
   }
 }
 
-window.writeContract = async function (contractAddress, contractABI, functionName, args, gas, chainId) {
+window.writeContract = async function (writeContractParameters) {
   try {
-    const result = await writeContract(config, {
-      abi: JSON.parse(contractABI),
-      address: contractAddress,
-      functionName: functionName,
-      args: args,
-      gas: gas,
-      chainId: chainId,
-    })
-
-    return result;
+    return await writeContract(config, writeContractParameters)
   } catch (error) {
     console.error("Error writeContract:", error);
     return null;
   }
 }
-

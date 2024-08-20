@@ -1,10 +1,11 @@
-import { WagmiCore, Chains, Web3modal, Connectors } from "https://cdn.jsdelivr.net/npm/cdn-wagmi@3.0.0/dist/cdn-wagmi.js"
+import { WagmiCore, Chains, Web3modal } from "https://cdn.jsdelivr.net/npm/cdn-wagmi@3.0.0/dist/cdn-wagmi.js"
 
 const { createWeb3Modal, defaultWagmiConfig } = Web3modal
 const { mainnet, sepolia } = Chains
-const { reconnect, getAccount, getChainId, getToken, signMessage } = WagmiCore
 
-const projectId = '.....'
+const { reconnect, getAccount, getChainId, getToken, signMessage, writeContract } = WagmiCore
+
+const projectId = '....'
 
 const metadata = {
   name: 'Web3Modal',
@@ -84,3 +85,22 @@ window.signMessage = async function (message, accountAddress) {
     return null;
   }
 }
+
+window.writeContract = async function (contractAddress, contractABI, functionName, args, gas, chainId) {
+  try {
+    const result = await writeContract(config, {
+      abi: JSON.parse(contractABI),
+      address: contractAddress,
+      functionName: functionName,
+      args: args,
+      gas: gas,
+      chainId: chainId,
+    })
+
+    return result;
+  } catch (error) {
+    console.error("Error writeContract:", error);
+    return null;
+  }
+}
+

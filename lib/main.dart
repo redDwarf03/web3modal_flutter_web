@@ -13,6 +13,14 @@ extension type JSWindow(JSObject _) implements JSObject {
   external JSPromise<Token> getToken(JSString address, int chainId);
   external JSPromise<JSString> signMessage(
       JSString message, JSString accountAddress);
+  external JSPromise<WriteContractReturnType> writeContract(
+    JSString contractAddress,
+    JSString contractABI,
+    JSString functionName,
+    JSAny args,
+    JSNumber gas,
+    JSNumber chainId,
+  );
 }
 
 @JS()
@@ -49,6 +57,11 @@ extension type Token(JSObject _) implements JSObject {
   external String? symbol;
 }
 
+@JS()
+extension type WriteContractReturnType(JSObject _) implements JSObject {
+  external String? hash;
+}
+
 void main() {
   runApp(const MyApp());
 }
@@ -65,6 +78,7 @@ class _MyAppState extends State<MyApp> {
   Token? token;
   Account? account;
   String? signedMessage;
+  String? hashApproval;
   final tokenAddressToSearch = '0xCBBd3374090113732393DAE1433Bc14E5233d5d7';
   final messageToSign = 'Hello World';
 
@@ -137,6 +151,28 @@ class _MyAppState extends State<MyApp> {
                     Text('message signed: $signedMessage'),
                   ],
                 ),
+              ElevatedButton(
+                onPressed: () async {
+                  await call(
+                      '0xCBBd3374090113732393DAE1433Bc14E5233d5d7',
+                      abiERC20,
+                      'approve',
+                      [
+                        '0x08Bfc8BA9fD137Fb632F79548B150FE0Be493254',
+                        100000000,
+                      ],
+                      chainId);
+
+                  setState(() {});
+                },
+                child: const Text('Call approve'),
+              ),
+              if (hashApproval != null)
+                Column(
+                  children: [
+                    Text('Hash approval: $hashApproval'),
+                  ],
+                ),
             ],
           ),
         ),
@@ -188,4 +224,307 @@ class _MyAppState extends State<MyApp> {
       return null;
     }
   }
+
+  Future<String?> call(String contractAddress, String contractABI,
+      String functionName, List<dynamic> args, int chainId) async {
+    try {
+      final result = await window
+          .writeContract(contractAddress.toJS, contractABI.toJS,
+              functionName.toJS, args.jsify()!, 1500000.toJS, chainId.toJS)
+          .toDart;
+      return result.hash;
+    } catch (e) {
+      print("Error call: $e");
+      return null;
+    }
+  }
 }
+
+const abiERC20 = '''[
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "name_",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "symbol_",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "spender",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "Approval",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "Transfer",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "spender",
+          "type": "address"
+        }
+      ],
+      "name": "allowance",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "spender",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "approve",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "decimals",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "spender",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "subtractedValue",
+          "type": "uint256"
+        }
+      ],
+      "name": "decreaseAllowance",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "spender",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "addedValue",
+          "type": "uint256"
+        }
+      ],
+      "name": "increaseAllowance",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "name",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "symbol",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalSupply",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "transfer",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "transferFrom",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ] ''';

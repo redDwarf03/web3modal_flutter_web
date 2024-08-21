@@ -5,7 +5,7 @@ const { mainnet, sepolia } = Chains
 
 const { reconnect, getAccount, getChainId, getToken, signMessage, writeContract, getBalance, } = WagmiCore
 
-const projectId = '....'
+const projectId = '...'
 
 const metadata = {
   name: 'Web3Modal',
@@ -87,8 +87,8 @@ window.signMessage = async function (signMessageParameters) {
   try {
     return await signMessage(config, signMessageParameters);
   } catch (error) {
-    console.error("Error message sign:", error);
-    return null;
+    console.error("Error signMessage js:", error);
+    throw error;
   }
 }
 

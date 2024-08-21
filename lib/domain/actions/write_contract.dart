@@ -1,11 +1,12 @@
 import 'dart:js_interop';
+
 import 'package:flutter_web_application_1/domain/models/connector.dart';
 
-/// [Documentation API](hhttps://wagmi.sh/core/api/actions/writeContract)
+/// [Documentation API](https://wagmi.sh/core/api/actions/writeContract)
 @JS()
 extension type WriteContractParameters._(JSObject _) implements JSObject {
   external WriteContractParameters({
-    required JSString abi,
+    required JSArray abi,
     required JSString address,
     required JSString functionName,
     JSArray? accessList,
@@ -23,7 +24,7 @@ extension type WriteContractParameters._(JSObject _) implements JSObject {
     JSBigInt? value,
   });
 
-  external JSString abi;
+  external JSArray abi;
   external JSString address;
   external JSArray? accessList;
   external JSString? account;

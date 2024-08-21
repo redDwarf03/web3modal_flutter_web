@@ -8,8 +8,7 @@ Future<WriteContractReturnType> writeContract(
   WriteContractParameters writeContractParameters,
 ) async {
   try {
-    final toto = await window.writeContract(writeContractParameters).toDart;
-    return toto;
+    return await window.writeContract(writeContractParameters).toDart;
   } catch (e) {
     log('Error writeContract: $e');
     throw WriteContractErrorType;

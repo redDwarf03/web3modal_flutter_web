@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:js_interop';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_web_application_1/application/actions/get_account.dart';
@@ -13,6 +12,7 @@ import 'package:flutter_web_application_1/domain/actions/get_balance.dart';
 import 'package:flutter_web_application_1/domain/actions/get_token.dart';
 import 'package:flutter_web_application_1/domain/actions/sign_message.dart';
 import 'package:flutter_web_application_1/domain/actions/write_contract.dart';
+import 'package:flutter_web_application_1/domain/bigint.dart';
 import 'package:flutter_web_application_1/domain/models/account.dart';
 import 'package:flutter_web_application_1/domain/window.dart';
 
@@ -38,7 +38,6 @@ class _MyAppState extends State<MyApp> {
   final messageToSign = 'Hello World';
 
   late String? abiERC20;
-
   @override
   void initState() {
     Future.delayed(Duration.zero, () async {
@@ -133,11 +132,16 @@ class _MyAppState extends State<MyApp> {
                     message: messageToSign.toJS,
                   );
 
-                  final signMessageReturnType =
-                      await signMessage(signMessageParameters);
-                  setState(() {
-                    signedMessage = signMessageReturnType.toString();
-                  });
+                  try {
+                    final signMessageReturnType =
+                        await signMessage(signMessageParameters);
+
+                    setState(() {
+                      signedMessage = signMessageReturnType.toString();
+                    });
+                  } catch (e) {
+                    print('erreur sign $e');
+                  }
                 },
                 child: Text('Personal sign ($messageToSign)'),
               ),
@@ -150,12 +154,39 @@ class _MyAppState extends State<MyApp> {
               ElevatedButton(
                 onPressed: () async {
                   final writeContractParameters = WriteContractParameters(
-                    abi: abiERC20!.toJS,
-                    address: '0xCBBd3374090113732393DAE1433Bc14E5233d5d7'.toJS,
+                    abi: [
+                      {
+                        "inputs".toJS: [
+                          {
+                            "internalType".toJS: "address".toJS,
+                            "name".toJS: "spender".toJS,
+                            "type".toJS: "address".toJS
+                          },
+                          {
+                            "internalType".toJS: "uint256".toJS,
+                            "name".toJS: "amount".toJS,
+                            "type".toJS: "uint256".toJS
+                          }
+                        ],
+                        "name".toJS: "approve".toJS,
+                        "outputs".toJS: [
+                          {
+                            "internalType".toJS: "bool".toJS,
+                            "name".toJS: "".toJS,
+                            "type".toJS: "bool".toJS
+                          }
+                        ],
+                        "stateMutability".toJS: "nonpayable".toJS,
+                        "type".toJS: "function".toJS
+                      }.jsify(),
+                    ].toJS,
+                    address: '0x8a3d77e9d6968b780564936d15B09805827C21fa'.toJS,
+                    account: account?.address,
                     functionName: 'approve'.toJS,
+                    gas: createBigInt('1500000'),
                     args: [
-                      '0x08Bfc8BA9fD137Fb632F79548B150FE0Be493254'.toJS,
-                      100000000.toJS,
+                      '0x346Dba8b51485FfBd4b07B0BCb84F48117751AD9'.toJS,
+                      createBigInt('498500000000000'),
                     ].toJS,
                     chainId: chainId.toJS,
                   );

@@ -8,9 +8,12 @@ Future<SignMessageReturnType> signMessage(
   SignMessageParameters signMessageParameters,
 ) async {
   try {
-    return await window.signMessage(signMessageParameters).toDart;
+    final toto = await window.signMessage(signMessageParameters).toDart;
+
+    print('toto $toto');
+    return toto;
   } catch (e) {
-    log('Error sign message: $e');
-    throw SignMessageErrorType;
+    log('Error signMessage dart: $e');
+    rethrow;
   }
 }
